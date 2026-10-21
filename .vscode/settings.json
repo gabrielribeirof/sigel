@@ -1,4 +1,15 @@
 {
   "eslint.enable": true,
-  "eslint.codeActionsOnSave.mode": "all"
+  "prettier.enable": false,
+  "editor.defaultFormatter": null,
+  "[typescript][javascript]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  },
+  "eslint.workingDirectories": [
+    "./backend",
+    "./frontend"
+  ],
+  "js/ts.tsdk.path": "./backend/node_modules/typescript/lib"
 }
