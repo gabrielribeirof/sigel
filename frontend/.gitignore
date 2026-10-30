@@ -3,8 +3,10 @@ logs
 *.log
 yarn-debug.log*
 yarn-error.log*
+.DS_Store
 
 node_modules
 dist
 
-.DS_Store
+# Tests
+coverage
