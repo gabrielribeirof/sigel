@@ -12,6 +12,6 @@ RUN yarn install --frozen-lockfile --non-interactive \
 
 COPY . .
 
-EXPOSE 3000 9229
+EXPOSE 4000 9229
 
 CMD ["npm", "run", "dev"]
