@@ -69,14 +69,18 @@ describe('AuthController', () => {
 			},
 			cookies: {},
 		})
-		const refresh = login.cookies?.find(cookie => cookie.name === 'sigel_refresh_token')?.value
+		const refresh = login.cookies?.find(
+			cookie => cookie.name === 'sigel_refresh_token',
+		)?.value
 		expect(login.statusCode).toBe(200)
 		const me = await controller.me({
 			params: {},
 			query: {},
 			body: {},
 			cookies: {
-				sigel_access_token: login.cookies?.find(cookie => cookie.name === 'sigel_access_token')?.value ?? '',
+				sigel_access_token: login.cookies?.find(
+					cookie => cookie.name === 'sigel_access_token',
+				)?.value ?? '',
 			},
 		})
 		expect(me.body).toEqual(login.body)

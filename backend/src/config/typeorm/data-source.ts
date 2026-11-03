@@ -30,7 +30,7 @@ export const TypeORMDataSource = new DataSource({
 		RoleTypeormEntity,
 		PermissionTypeormEntity,
 		AuthTokenTypeormEntity,
-        CategoryTypeormEntity, EquipmentTypeormEntity, PromotionTypeormEntity,
+		CategoryTypeormEntity, EquipmentTypeormEntity, PromotionTypeormEntity,
 	],
 	migrations: [join(directory, 'migrations/*.{js,ts}')],
 })
