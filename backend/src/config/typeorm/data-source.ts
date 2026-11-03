@@ -8,6 +8,10 @@ import { PermissionTypeormEntity } from './entities/permission.typeorm-entity.js
 import { AuthTokenTypeormEntity } from './entities/auth-token.typeorm-entity.js'
 import { EnvConfig } from '../env/env.config.js'
 
+import { CategoryTypeormEntity } from './entities/category.typeorm-entity.js'
+import { EquipmentTypeormEntity } from './entities/equipment.typeorm-entity.js'
+import { PromotionTypeormEntity } from './entities/promotion.typeorm-entity.js'
+
 const directory = dirname(fileURLToPath(import.meta.url))
 
 export const TypeORMDataSource = new DataSource({
@@ -26,6 +30,7 @@ export const TypeORMDataSource = new DataSource({
 		RoleTypeormEntity,
 		PermissionTypeormEntity,
 		AuthTokenTypeormEntity,
+        CategoryTypeormEntity, EquipmentTypeormEntity, PromotionTypeormEntity,
 	],
 	migrations: [join(directory, 'migrations/*.{js,ts}')],
 })

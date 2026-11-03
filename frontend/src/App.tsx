@@ -1,3 +1,4 @@
+import { CatalogPage } from './pages/catalog/catalog.page'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './shared/auth/auth.context'
 import { DashboardLayout } from './pages/dashboard/dashboard.layout'
@@ -22,6 +23,9 @@ function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />} path={ROUTES.dashboard}>
             <Route index element={<DashboardOverview />} />
+            <Route path={DASHBOARD_ROUTE_SEGMENTS.categories} element={<CatalogPage kind="categories" />} />
+            <Route path={DASHBOARD_ROUTE_SEGMENTS.equipments} element={<CatalogPage kind="equipments" />} />
+            <Route path={DASHBOARD_ROUTE_SEGMENTS.promotions} element={<CatalogPage kind="promotions" />} />
             <Route
               element={<UsersLayout><UsersPage /></UsersLayout>}
               path={DASHBOARD_ROUTE_SEGMENTS.users}

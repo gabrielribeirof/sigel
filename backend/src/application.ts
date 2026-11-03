@@ -28,6 +28,11 @@ import { AuthController } from './controllers/auth/auth.controller.js'
 import { JoseTokenProvider } from './infrastructure/providers/token/jose-token.provider.js'
 import { CryptoRefreshTokenProvider } from './infrastructure/providers/token/crypto-refresh-token.provider.js'
 
+import { CatalogController } from './controllers/catalog/catalog.controller.js'
+import { CategoryTypeormEntity } from './config/typeorm/entities/category.typeorm-entity.js'
+import { EquipmentTypeormEntity } from './config/typeorm/entities/equipment.typeorm-entity.js'
+import { PromotionTypeormEntity } from './config/typeorm/entities/promotion.typeorm-entity.js'
+
 export class Application {
 	public constructor(private readonly httpServer: HttpServer) {
 		Identifier.configure(new UUIDv7IdentifierProvider())
@@ -62,6 +67,7 @@ export class Application {
 		new UserController(userService, this.httpServer)
 		new EmployeeController(employeeService, this.httpServer)
 		new RoleController(roleService, this.httpServer)
+		new CatalogController(this.httpServer, TypeORMDataSource.getRepository(CategoryTypeormEntity), TypeORMDataSource.getRepository(EquipmentTypeormEntity), TypeORMDataSource.getRepository(PromotionTypeormEntity))
 
 		this.httpServer.listen(EnvConfig.get('HTTP_PORT'))
 	}
