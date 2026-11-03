@@ -19,6 +19,7 @@ export const TypeORMDataSource = new DataSource({
 	database: EnvConfig.get('DATABASE_NAME'),
 	synchronize: false,
 	logging: true,
+	migrationsRun: true,
 	entities: [
 		UserTypeormEntity,
 		EmployeeTypeormEntity,

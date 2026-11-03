@@ -14,7 +14,6 @@ O controle financeiro simplificado gerenciará as contas a receber (entradas ori
 Como funções de saída e apoio à tomada de decisão, o sistema emitirá relatórios gerenciais de fluxo financeiro mensal (consolidando entradas recebidas, saídas pagas e títulos em aberto no período), relatório de posição e disponibilidade do acervo por categoria e situação, relatório de histórico de locações e garantias por equipamento e relatório de desempenho de pacotes promocionais.
 Com a implantação do SIGEL, a EVENTPRO LOCAÇÕES obterá rastreabilidade total do acervo para evitar extravios, visão clara da saúde financeira mensal e maior agilidade e segurança na formalização das locações.
 
-
 # Funções do Produto
 
 Referência	Função	Visibilidade

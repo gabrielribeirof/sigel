@@ -14,4 +14,4 @@ COPY . .
 
 EXPOSE 4000 9229
 
-CMD ["npm", "run", "dev"]
+CMD ["yarn", "run", "dev"]
