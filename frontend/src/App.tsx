@@ -9,6 +9,7 @@ import { RolesLayout } from './pages/roles/roles.layout'
 import { RolesPage } from './pages/roles/roles.page'
 import { UsersLayout } from './pages/users/users.layout'
 import { UsersPage } from './pages/users/users.page'
+import { PartiesPage } from './pages/parties/parties.page'
 import { ProtectedRoute, PublicRoute } from './app/route-guards'
 import { DASHBOARD_ROUTE_SEGMENTS, ROUTES } from './app/routes'
 
@@ -30,6 +31,8 @@ function AppRoutes() {
               element={<EmployeesLayout><EmployeesPage /></EmployeesLayout>}
               path={DASHBOARD_ROUTE_SEGMENTS.employees}
             />
+            <Route path={DASHBOARD_ROUTE_SEGMENTS.customers} element={<PartiesPage kind="customers" />} />
+            <Route path={DASHBOARD_ROUTE_SEGMENTS.suppliers} element={<PartiesPage kind="suppliers" />} />
             <Route
               element={<RolesLayout><RolesPage /></RolesLayout>}
               path={DASHBOARD_ROUTE_SEGMENTS.roles}
