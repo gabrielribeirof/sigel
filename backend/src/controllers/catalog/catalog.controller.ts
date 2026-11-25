@@ -134,7 +134,14 @@ export class CatalogController {
 					...existingData,
 					...data,
 				}
-				if (String(v.endDate) < String(v.startDate)) {
+				const start = String(v.startDate)
+				const end = String(v.endDate)
+				const validDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value)
+					&& !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`))
+				if (!validDate(start) || !validDate(end)) {
+					throw new Error('Informe datas válidas.')
+				}
+				if (end < start) {
 					throw new Error('Data final anterior à inicial')
 				}
 				if (
@@ -148,24 +155,25 @@ export class CatalogController {
 					throw new Error('Meta inválida')
 				}
 			}
-			const row = await (repo as Repository<CatalogEntity>).save({
-				...existing,
-				...data,
-				id,
-				...(name === 'promotions' && !existing ? { rentalCount: 0 } : {}),
-			})
-			if (name === 'promotions' && (req.body as RecordData).equipmentIds !== undefined) {
-				const ids = (req.body as RecordData).equipmentIds
+			let row: CatalogEntity
+			if (name === 'promotions') {
+				const ids = (req.body as RecordData).equipmentIds ?? []
 				if (!Array.isArray(ids) || ids.some(x => typeof x !== 'string')) {
 					throw new Error('Equipamentos inválidos')
 				}
-				const unique = [...new Set(ids)]
-				for (const equipmentId of unique) {
-					if (!await this.equipments.findOneBy({ id: equipmentId })) {
-						throw new Error('Equipamento inexistente')
+				const unique = [...new Set(ids as string[])]
+				row = await TypeORMDataSource.transaction(async (manager) => {
+					for (const equipmentId of unique) {
+						if (!await manager.getRepository(EquipmentTypeormEntity).findOneBy({ id: equipmentId })) {
+							throw new Error('Equipamento inexistente')
+						}
 					}
-				}
-				await TypeORMDataSource.transaction(async (manager) => {
+					const saved = await manager.getRepository(PromotionTypeormEntity).save({
+						...existing,
+						...data,
+						id,
+						...(!existing ? { rentalCount: 0 } : {}),
+					})
 					await manager.query('DELETE FROM promotion_equipments WHERE promotion_id = $1', [id])
 					for (const equipmentId of unique) {
 						await manager.query(
@@ -173,6 +181,14 @@ export class CatalogController {
 							[id, equipmentId],
 						)
 					}
+					return saved
+				})
+			}
+			else {
+				row = await (repo as Repository<CatalogEntity>).save({
+					...existing,
+					...data,
+					id,
 				})
 			}
 			return {
