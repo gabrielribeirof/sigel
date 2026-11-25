@@ -6,7 +6,6 @@ export const Permission = {
 	ManageUsers: PermissionBit.create(1n << 0n),
 	ManageEmployees: PermissionBit.create(1n << 1n),
 	ManageRoles: PermissionBit.create(1n << 2n),
-	ReadEmployees: PermissionBit.create(1n << 3n),
 } as const
 
 export type PermissionKey = keyof typeof Permission
@@ -15,7 +14,6 @@ export const PermissionKeyName: Record<PermissionKey, string> = {
 	ManageUsers: 'Gerenciar usuários',
 	ManageEmployees: 'Gerenciar funcionários',
 	ManageRoles: 'Gerenciar perfis',
-	ReadEmployees: 'Visualizar funcionários',
 }
 
 export const allPermissionsMask = (): bigint =>

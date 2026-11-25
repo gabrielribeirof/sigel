@@ -28,7 +28,6 @@ export class EmployeeController {
 		await this.authorizer.authorize(
 			request.userId,
 			PermissionRequirement.any(
-				Permission.ReadEmployees,
 				Permission.ManageEmployees,
 				Permission.ManageUsers,
 			),

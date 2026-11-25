@@ -41,7 +41,7 @@ describe('AuthController', () => {
 		const roles = new InMemoryRoleRepository()
 		const users = new InMemoryUserRepository()
 		const tokens = new InMemoryAuthTokenRepository()
-		const role = await new RoleService(roles).create('Administrator')
+		const role = await new RoleService(roles).create('Administrator', 7n)
 		const userService = new UserService(users, roles, new FakePasswordHasher(), tokens)
 		await userService.create({
 			email: 'admin@example.com',
@@ -54,6 +54,7 @@ describe('AuthController', () => {
 			tokens,
 			new JoseTokenProvider(),
 			new CryptoRefreshTokenProvider(),
+			roles,
 		)
 		const server = new InMemoryHttpServer()
 		const controller = new AuthController(auth, server)
@@ -84,6 +85,7 @@ describe('AuthController', () => {
 			},
 		})
 		expect(me.body).toEqual(login.body)
+		expect(me.body).toMatchObject({ permissionsMask: '7' })
 		expect((await controller.refresh({
 			params: {},
 			query: {},

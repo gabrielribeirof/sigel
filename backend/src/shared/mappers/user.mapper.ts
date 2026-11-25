@@ -13,7 +13,9 @@ export type UserDTO = {
 	updatedAt: string
 }
 
-export type AuthenticatedUserDTO = Pick<UserDTO, 'id' | 'email' | 'roleId'>
+export type AuthenticatedUserDTO = Pick<UserDTO, 'id' | 'email' | 'roleId'> & {
+	permissionsMask: string
+}
 
 export class UserMapper {
 	public static toDomain(entity: UserTypeormEntity): User {
@@ -51,11 +53,12 @@ export class UserMapper {
 		}
 	}
 
-	public static toAuthenticatedDTO(user: User): AuthenticatedUserDTO {
+	public static toAuthenticatedDTO(user: User, permissionsMask = '0'): AuthenticatedUserDTO {
 		return {
 			id: user.id.value,
 			email: user.email,
 			roleId: user.roleId.value,
+			permissionsMask,
 		}
 	}
 }

@@ -1,10 +1,13 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { NAV_ITEMS } from '../../app/routes'
 import { useAuth } from '../../shared/auth/use-auth'
+import { usePermissions } from '../../shared/auth/use-permissions'
 
 export function DashboardLayout() {
   const { user, logout } = useAuth()
+  const { can } = usePermissions()
   if (!user) return null
+  const visibleNavItems = NAV_ITEMS.filter(item => can(item.permission))
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <header className="flex items-center justify-between bg-slate-950 px-6 py-4 text-white">
@@ -13,7 +16,7 @@ export function DashboardLayout() {
       </header>
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 lg:flex-row lg:px-8">
         <nav className="flex gap-2 overflow-auto lg:w-56 lg:flex-col">
-          {NAV_ITEMS.map(item => (
+          {visibleNavItems.map(item => (
             <NavLink
               className={({ isActive }) => `nav-item ${isActive ? 'nav-item-active' : ''}`}
               end={item.end}

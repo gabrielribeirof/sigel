@@ -12,7 +12,7 @@ describe('AuthorizationService', () => {
 	it('should authorize a user whose role satisfies the requirement', async () => {
 		const roles = new InMemoryRoleRepository()
 		const users = new InMemoryUserRepository()
-		const role = await new RoleService(roles).create('HR', Permission.ReadEmployees.value)
+		const role = await new RoleService(roles).create('HR', Permission.ManageEmployees.value)
 		const user = await new UserService(users, roles, new FakePasswordHasher()).create({
 			email: 'hr@example.com',
 			password: 'secret',
@@ -21,11 +21,11 @@ describe('AuthorizationService', () => {
 		})
 		const sut = new AuthorizationService(users, roles)
 
-		await expect(sut.authorize(user.id.value, Permission.ReadEmployees)).resolves.toBeUndefined()
+		await expect(sut.authorize(user.id.value, Permission.ManageEmployees)).resolves.toBeUndefined()
 		await expect(
 			sut.authorize(
 				user.id.value,
-				PermissionRequirement.any(Permission.ManageEmployees, Permission.ReadEmployees),
+				PermissionRequirement.any(Permission.ManageEmployees, Permission.ManageUsers),
 			),
 		).resolves.toBeUndefined()
 	})
@@ -33,7 +33,7 @@ describe('AuthorizationService', () => {
 	it('should throw ForbiddenError when user lacks the required permission', async () => {
 		const roles = new InMemoryRoleRepository()
 		const users = new InMemoryUserRepository()
-		const role = await new RoleService(roles).create('Viewer', Permission.ReadEmployees.value)
+		const role = await new RoleService(roles).create('HR', Permission.ManageEmployees.value)
 		const user = await new UserService(users, roles, new FakePasswordHasher()).create({
 			email: 'viewer@example.com',
 			password: 'secret',

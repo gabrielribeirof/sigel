@@ -28,19 +28,19 @@ describe('PermissionRequirement', () => {
 	})
 
 	it('should check any of the accepted permissions', () => {
-		const reader = Role.create({
-			name: 'Employee Reader',
-			permissionsMask: PermissionsMask.create(Permission.ReadEmployees.value),
+		const employeeManager = Role.create({
+			name: 'Employee Manager',
+			permissionsMask: PermissionsMask.create(Permission.ManageEmployees.value),
 		})
 		const none = Role.create({
 			name: 'Guest',
 			permissionsMask: PermissionsMask.create(0n),
 		})
-		const requirement = PermissionRequirement.any(Permission.ReadEmployees, Permission.ManageEmployees)
+		const requirement = PermissionRequirement.any(Permission.ManageEmployees, Permission.ManageUsers)
 
-		expect(requirement.isSatisfiedBy(reader)).toBe(true)
+		expect(requirement.isSatisfiedBy(employeeManager)).toBe(true)
 		expect(requirement.isSatisfiedBy(none)).toBe(false)
-		expect(() => requirement.ensureSatisfiedBy(reader)).not.toThrow()
+		expect(() => requirement.ensureSatisfiedBy(employeeManager)).not.toThrow()
 		expect(() => requirement.ensureSatisfiedBy(none)).toThrow(ForbiddenError)
 	})
 })

@@ -119,7 +119,7 @@ describe('backend functional API', () => {
 	})
 
 	it('should return 403 FORBIDDEN when the authenticated user lacks the required permission', async () => {
-		const { httpServer } = await setupApp(Permission.ReadEmployees.value)
+		const { httpServer } = await setupApp(Permission.ManageUsers.value)
 
 		const listEmployees = await request(httpServer.expressApp).get('/employees')
 		expect(listEmployees.status).toBe(200)
@@ -136,11 +136,15 @@ describe('backend functional API', () => {
 		expect(createEmployee.body.type).toBe('FORBIDDEN')
 
 		const listUsers = await request(httpServer.expressApp).get('/users')
-		expect(listUsers.status).toBe(403)
-		expect(listUsers.body.type).toBe('FORBIDDEN')
+		expect(listUsers.status).toBe(200)
 
-		const listRoles = await request(httpServer.expressApp).get('/roles')
-		expect(listRoles.status).toBe(403)
-		expect(listRoles.body.type).toBe('FORBIDDEN')
+		const createRole = await request(httpServer.expressApp)
+			.post('/roles')
+			.send({
+				name: 'Viewer',
+				permissionsMask: '0',
+			})
+		expect(createRole.status).toBe(403)
+		expect(createRole.body.type).toBe('FORBIDDEN')
 	})
 })

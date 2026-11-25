@@ -62,11 +62,6 @@ describe('RoleController', () => {
 				keyName: 'Gerenciar perfis',
 				bit: '4',
 			},
-			{
-				key: 'ReadEmployees',
-				keyName: 'Visualizar funcionários',
-				bit: '8',
-			},
 		])
 	})
 

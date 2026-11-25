@@ -3,6 +3,7 @@ import type { AuthTokenRepository } from '../domain/auth/auth-token.repository.j
 import { AuthToken } from '../domain/auth/auth-token.js'
 import type { RefreshTokenProvider } from '../domain/auth/refresh-token-provider.js'
 import type { TokenProvider } from '../domain/auth/token-provider.js'
+import type { RoleRepository } from '../domain/role/role.repository.js'
 import type { User } from '../domain/user/user.js'
 import { AppError, InvalidCredentialsError } from '../shared/errors/app.error.js'
 import { UserMapper } from '../shared/mappers/user.mapper.js'
@@ -17,6 +18,7 @@ export class AuthService {
 		private readonly authTokenRepository: AuthTokenRepository,
 		private readonly tokenProvider: TokenProvider,
 		private readonly refreshTokenProvider: RefreshTokenProvider,
+		private readonly roles?: RoleRepository,
 	) {}
 
 	public async login(email: string, password: string): Promise<Response> {
@@ -44,9 +46,10 @@ export class AuthService {
 		const userId = await this.authenticate(request)
 		const user = await this.users.findById(userId)
 		if (!user) throw new InvalidCredentialsError()
+		const permissionsMask = await this.resolvePermissionsMask(user)
 		return {
 			statusCode: 200,
-			body: UserMapper.toAuthenticatedDTO(user),
+			body: UserMapper.toAuthenticatedDTO(user, permissionsMask),
 		}
 	}
 
@@ -102,9 +105,10 @@ export class AuthService {
 			tokenHash: refresh.hash,
 			expiresAt: refresh.expiresAt,
 		}))
+		const permissionsMask = await this.resolvePermissionsMask(user)
 		return {
 			statusCode: 200,
-			body: UserMapper.toAuthenticatedDTO(user),
+			body: UserMapper.toAuthenticatedDTO(user, permissionsMask),
 			cookies: [
 				{
 					name: ACCESS_COOKIE,
@@ -125,6 +129,12 @@ export class AuthService {
 			token.revoke()
 			await this.authTokenRepository.save(token)
 		}
+	}
+
+	private async resolvePermissionsMask(user: User): Promise<string> {
+		if (!this.roles) return '0'
+		const role = await this.roles.findById(user.roleId)
+		return role?.permissionsMask.value.toString() ?? '0'
 	}
 }
 

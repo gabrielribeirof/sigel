@@ -60,6 +60,7 @@ export class Application {
 			tokens,
 			new JoseTokenProvider(),
 			new CryptoRefreshTokenProvider(),
+			roles,
 		)
 		this.httpServer.setAuthentication?.(request => authService.authenticate(request))
 

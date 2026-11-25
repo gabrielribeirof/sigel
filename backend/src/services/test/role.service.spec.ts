@@ -10,7 +10,7 @@ describe('RoleService', () => {
 		const sut = new RoleService(repository)
 		const role = await sut.create('Readers')
 
-		await sut.grant(role.id, Permission.ReadEmployees)
+		await sut.grant(role.id, Permission.ManageEmployees)
 		await sut.update(role.id, 'Managers', Permission.ManageUsers)
 		expect((await sut.findAll())[0]).toMatchObject({
 			name: 'Managers',
