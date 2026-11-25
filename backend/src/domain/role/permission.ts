@@ -10,6 +10,14 @@ export const Permission = {
 } as const
 
 export type PermissionKey = keyof typeof Permission
+
+export const PermissionKeyName: Record<PermissionKey, string> = {
+	ManageUsers: 'Gerenciar usuários',
+	ManageEmployees: 'Gerenciar funcionários',
+	ManageRoles: 'Gerenciar perfis',
+	ReadEmployees: 'Visualizar funcionários',
+}
+
 export const allPermissionsMask = (): bigint =>
 	Object.values(Permission).reduce((mask, bit) => mask | bit.value, 0n)
 
@@ -18,9 +26,11 @@ export const hasPermission = (mask: bigint, permission: PermissionBit): boolean 
 
 export const permissionEntries = (): Array<{
 	key: PermissionKey
+	keyName: string
 	bit: PermissionBit
 }> =>
 	Object.entries(Permission).map(([key, bit]) => ({
 		key: key as PermissionKey,
+		keyName: PermissionKeyName[key as PermissionKey],
 		bit,
 	}))

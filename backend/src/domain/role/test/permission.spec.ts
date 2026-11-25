@@ -16,6 +16,12 @@ describe('Permission', () => {
 			'ManageRoles',
 			'ReadEmployees',
 		])
+		expect(entries.map(entry => entry.keyName)).toEqual([
+			'Gerenciar usuários',
+			'Gerenciar funcionários',
+			'Gerenciar perfis',
+			'Visualizar funcionários',
+		])
 		expect(allPermissionsMask()).toBe(15n)
 		expect(hasPermission(allPermissionsMask(), Permission.ManageRoles)).toBe(true)
 		expect(hasPermission(Permission.ManageUsers.value, Permission.ManageRoles)).toBe(false)

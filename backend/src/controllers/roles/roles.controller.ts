@@ -24,8 +24,9 @@ export class RoleController {
 	public permissions(): Response {
 		return {
 			statusCode: StatusCode.Ok,
-			body: permissionEntries().map(({ key, bit }) => ({
+			body: permissionEntries().map(({ key, keyName, bit }) => ({
 				key,
+				keyName,
 				bit: bit.value.toString(),
 			})),
 		}

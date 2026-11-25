@@ -5,7 +5,7 @@ import { FieldError } from '../../shared/forms/field-error'
 import type { EntityRow } from '../shared/entity-list'
 import { FormModal } from '../shared/form-modal'
 
-export type Permission = { key: string; bit: string }
+export type Permission = { key: string; keyName: string; bit: string }
 export type RoleForm = { name: string; permissions: Record<string, boolean> }
 
 export function RoleFormModal({ editing, permissions, onClose, onSave }: { editing: EntityRow | null; permissions: Permission[]; onClose: () => void; onSave: (values: RoleForm) => Promise<void> }) {
@@ -31,7 +31,7 @@ export function RoleFormModal({ editing, permissions, onClose, onSave }: { editi
   return (
     <FormModal isSubmitting={isSubmitting} onClose={onClose} onSubmit={event => void handleSubmit(submit)(event)} serverError={serverError} title={`${editing ? 'Editar' : 'Novo'} perfil`}>
       <label className="block text-sm font-medium text-slate-700">Nome<input className="input mt-2" {...register('name', { required: 'Informe o nome.' })} /><FieldError message={errors.name?.message} /></label>
-      <fieldset className="space-y-2"><legend className="text-sm font-medium text-slate-700">Permissões</legend>{permissions.map(permission => <label className="flex items-center gap-2 text-sm text-slate-700" key={permission.key}><input type="checkbox" {...register(`permissions.${permission.key}`)} />{permission.key}</label>)}</fieldset>
+      <fieldset className="space-y-2"><legend className="text-sm font-medium text-slate-700">Permissões</legend>{permissions.map(permission => <label className="flex items-center gap-2 text-sm text-slate-700" key={permission.key}><input type="checkbox" {...register(`permissions.${permission.key}`)} />{permission.keyName}</label>)}</fieldset>
     </FormModal>
   )
 }
