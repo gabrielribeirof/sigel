@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, ApiError } from '../../shared/api/client'
+import { Permission } from '../../shared/auth/permissions'
+import { usePermissions } from '../../shared/auth/use-permissions'
 import { EntityList, type EntityColumn, type EntityRow } from '../shared/entity-list'
 import { UserFormModal, type UserForm } from './user-form-modal.component'
 
@@ -8,6 +10,8 @@ const MASTER_USER_ID = '01900000-0000-7000-8000-000000000002'
 
 export function UsersPage() {
   const queryClient = useQueryClient()
+  const { can } = usePermissions()
+  const canManageUsers = can(Permission.ManageUsers)
   const [editing, setEditing] = useState<EntityRow | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [deleteError, setDeleteError] = useState('')
@@ -28,6 +32,7 @@ export function UsersPage() {
     onError: error => setDeleteError(error instanceof ApiError ? error.message : 'Não foi possível excluir o usuário.'),
   })
   const open = (row?: EntityRow) => {
+    if (!canManageUsers) return
     setEditing(row ?? null)
     setModalOpen(true)
     setDeleteError('')
@@ -39,7 +44,30 @@ export function UsersPage() {
   ]
   return (
     <>
-      <EntityList columns={columns} createLabel="Novo usuário" deleteError={deleteError} deletingId={remove.isPending ? remove.variables : undefined} description="Cadastre e gerencie os usuários do sistema." isError={users.isError} isLoading={users.isLoading} isProtected={row => row.id === MASTER_USER_ID} onCreate={() => open()} onDelete={row => { if (window.confirm('Remover este usuário?')) { setDeleteError(''); void remove.mutateAsync(String(row.id)) } }} onEdit={open} protectedMessage="Usuário protegido" rows={users.data ?? []} title="Usuários" />
+      <EntityList
+        canCreate={canManageUsers}
+        canDelete={canManageUsers}
+        canEdit={canManageUsers}
+        columns={columns}
+        createLabel="Novo usuário"
+        deleteError={deleteError}
+        deletingId={remove.isPending ? remove.variables : undefined}
+        description="Cadastre e gerencie os usuários do sistema."
+        isError={users.isError}
+        isLoading={users.isLoading}
+        isProtected={row => row.id === MASTER_USER_ID}
+        onCreate={() => open()}
+        onDelete={row => {
+          if (canManageUsers && window.confirm('Remover este usuário?')) {
+            setDeleteError('')
+            void remove.mutateAsync(String(row.id))
+          }
+        }}
+        onEdit={open}
+        protectedMessage="Usuário protegido"
+        rows={users.data ?? []}
+        title="Usuários"
+      />
       {modalOpen && <UserFormModal editing={editing} employees={employees.data ?? []} onClose={() => setModalOpen(false)} onSave={async values => { await save.mutateAsync({ id: editing?.id ? String(editing.id) : undefined, values }) }} roles={roles.data ?? []} />}
     </>
   )

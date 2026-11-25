@@ -1,18 +1,26 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, ApiError } from '../../shared/api/client'
+import { Permission } from '../../shared/auth/permissions'
+import { usePermissions } from '../../shared/auth/use-permissions'
 import { EntityList, type EntityColumn, type EntityRow } from '../shared/entity-list'
-import { RoleFormModal, type Permission, type RoleForm } from './role-form-modal.component'
+import { RoleFormModal, type Permission as PermissionItem, type RoleForm } from './role-form-modal.component'
 
 const ADMINISTRATOR_ROLE_ID = '01900000-0000-7000-8000-000000000001'
 
 export function RolesPage() {
   const queryClient = useQueryClient()
+  const { can } = usePermissions()
+  const canManageRoles = can(Permission.ManageRoles)
   const [editing, setEditing] = useState<EntityRow | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const roles = useQuery({ queryKey: ['roles'], queryFn: () => api.get<EntityRow[]>('/roles') })
-  const permissions = useQuery({ queryKey: ['permissions'], queryFn: () => api.get<Permission[]>('/permissions') })
+  const permissions = useQuery({
+    queryKey: ['permissions'],
+    queryFn: () => api.get<PermissionItem[]>('/permissions'),
+    enabled: canManageRoles,
+  })
   const save = useMutation({
     mutationFn: async ({ id, values }: { id?: string; values: RoleForm }) => {
       const permissionsMask = (permissions.data ?? []).reduce((mask, permission) => values.permissions[permission.key] ? mask | BigInt(permission.bit) : mask, 0n)
@@ -30,7 +38,7 @@ export function RolesPage() {
     onError: error => setDeleteError(error instanceof ApiError ? error.message : 'Não foi possível excluir o perfil.'),
   })
   const open = (row?: EntityRow) => {
-    if (row?.id === ADMINISTRATOR_ROLE_ID) return
+    if (!canManageRoles || row?.id === ADMINISTRATOR_ROLE_ID) return
     setEditing(row ?? null)
     setModalOpen(true)
     setDeleteError('')
@@ -51,7 +59,30 @@ export function RolesPage() {
   ]
   return (
     <>
-      <EntityList columns={columns} createLabel="Novo perfil" deleteError={deleteError} deletingId={remove.isPending ? remove.variables : undefined} description="Defina perfis e permissões de acesso." isError={roles.isError} isLoading={roles.isLoading} isProtected={row => row.id === ADMINISTRATOR_ROLE_ID} onCreate={() => open()} onDelete={row => { if (window.confirm('Remover este perfil?')) { setDeleteError(''); void remove.mutateAsync(String(row.id)) } }} onEdit={open} protectedMessage="Perfil administrador protegido" rows={roles.data ?? []} title="Perfis" />
+      <EntityList
+        canCreate={canManageRoles}
+        canDelete={canManageRoles}
+        canEdit={canManageRoles}
+        columns={columns}
+        createLabel="Novo perfil"
+        deleteError={deleteError}
+        deletingId={remove.isPending ? remove.variables : undefined}
+        description="Defina perfis e permissões de acesso."
+        isError={roles.isError}
+        isLoading={roles.isLoading}
+        isProtected={row => row.id === ADMINISTRATOR_ROLE_ID}
+        onCreate={() => open()}
+        onDelete={row => {
+          if (canManageRoles && window.confirm('Remover este perfil?')) {
+            setDeleteError('')
+            void remove.mutateAsync(String(row.id))
+          }
+        }}
+        onEdit={open}
+        protectedMessage="Perfil administrador protegido"
+        rows={roles.data ?? []}
+        title="Perfis"
+      />
       {modalOpen && <RoleFormModal editing={editing} onClose={() => setModalOpen(false)} onSave={async values => { await save.mutateAsync({ id: editing?.id ? String(editing.id) : undefined, values }) }} permissions={permissions.data ?? []} />}
     </>
   )

@@ -9,6 +9,9 @@ import {
   type SortingState,
 } from '@tanstack/react-table'
 import { useDebouncedValue } from '../../shared/forms/use-field-errors'
+import { Tooltip } from './tooltip'
+
+const DEFAULT_NO_PERMISSION_MESSAGE = 'Você não tem permissão para esta ação.'
 
 export type EntityRow = Record<string, string | boolean | null>
 export type EntityColumn = {
@@ -33,6 +36,10 @@ type EntityListProps = {
   onDelete: (row: EntityRow) => void
   isProtected?: (row: EntityRow) => boolean
   protectedMessage?: string
+  canCreate?: boolean
+  canEdit?: boolean
+  canDelete?: boolean
+  noPermissionMessage?: string
 }
 
 export function EntityList({
@@ -50,6 +57,10 @@ export function EntityList({
   onDelete,
   isProtected = () => false,
   protectedMessage,
+  canCreate = true,
+  canEdit = true,
+  canDelete = true,
+  noPermissionMessage = DEFAULT_NO_PERMISSION_MESSAGE,
 }: EntityListProps) {
   const [search, setSearch] = useState('')
   const [sorting, setSorting] = useState<SortingState>([])
@@ -104,9 +115,16 @@ export function EntityList({
           <h1 className="page-title">{title}</h1>
           <p className="mt-1 text-sm text-slate-500">{description}</p>
         </div>
-        <button className="button-primary" onClick={onCreate} type="button">
-          + {createLabel}
-        </button>
+        <Tooltip align="end" content={!canCreate ? noPermissionMessage : undefined}>
+          <button
+            className="button-primary"
+            disabled={!canCreate}
+            onClick={onCreate}
+            type="button"
+          >
+            + {createLabel}
+          </button>
+        </Tooltip>
       </div>
       <div className="card overflow-hidden">
         <div className="border-b border-slate-200 p-4">
@@ -153,24 +171,32 @@ export function EntityList({
                         </td>
                       ))}
                       <td className="whitespace-nowrap px-4 py-3 text-right">
-                        <button
-                          className="mr-3 text-violet-700 hover:underline disabled:cursor-not-allowed disabled:text-slate-400"
-                          disabled={protectedRow}
-                          onClick={() => onEdit(row.original)}
-                          title={protectedRow ? protectedMessage : undefined}
-                          type="button"
+                        <Tooltip
+                          align="end"
+                          content={!canEdit ? noPermissionMessage : protectedRow ? protectedMessage : undefined}
                         >
-                          Editar
-                        </button>
-                        <button
-                          className="text-rose-600 hover:underline disabled:cursor-not-allowed disabled:text-slate-400"
-                          disabled={protectedRow || deletingId === id}
-                          onClick={() => onDelete(row.original)}
-                          title={protectedRow ? protectedMessage : undefined}
-                          type="button"
+                          <button
+                            className="mr-3 text-violet-700 hover:underline disabled:cursor-not-allowed disabled:text-slate-400"
+                            disabled={protectedRow || !canEdit}
+                            onClick={() => onEdit(row.original)}
+                            type="button"
+                          >
+                            Editar
+                          </button>
+                        </Tooltip>
+                        <Tooltip
+                          align="end"
+                          content={!canDelete ? noPermissionMessage : protectedRow ? protectedMessage : undefined}
                         >
-                          {deletingId === id ? 'Excluindo...' : 'Excluir'}
-                        </button>
+                          <button
+                            className="text-rose-600 hover:underline disabled:cursor-not-allowed disabled:text-slate-400"
+                            disabled={protectedRow || !canDelete || deletingId === id}
+                            onClick={() => onDelete(row.original)}
+                            type="button"
+                          >
+                            {deletingId === id ? 'Excluindo...' : 'Excluir'}
+                          </button>
+                        </Tooltip>
                       </td>
                     </tr>
                   )

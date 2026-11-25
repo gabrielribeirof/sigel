@@ -1,11 +1,15 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, ApiError } from '../../shared/api/client'
+import { Permission } from '../../shared/auth/permissions'
+import { usePermissions } from '../../shared/auth/use-permissions'
 import { EntityList, type EntityColumn, type EntityRow } from '../shared/entity-list'
 import { EmployeeFormModal, type EmployeeForm } from './employee-form-modal.component'
 
 export function EmployeesPage() {
   const queryClient = useQueryClient()
+  const { can } = usePermissions()
+  const canManageEmployees = can(Permission.ManageEmployees)
   const [editing, setEditing] = useState<EntityRow | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [deleteError, setDeleteError] = useState('')
@@ -24,6 +28,7 @@ export function EmployeesPage() {
     onError: error => setDeleteError(error instanceof ApiError ? error.message : 'Não foi possível excluir o funcionário.'),
   })
   const open = (row?: EntityRow) => {
+    if (!canManageEmployees) return
     setEditing(row ?? null)
     setModalOpen(true)
     setDeleteError('')
@@ -41,7 +46,28 @@ export function EmployeesPage() {
   ]
   return (
     <>
-      <EntityList columns={columns} createLabel="Novo funcionário" deleteError={deleteError} deletingId={remove.isPending ? remove.variables : undefined} description="Cadastre e gerencie os funcionários." isError={employees.isError} isLoading={employees.isLoading} onCreate={() => open()} onDelete={row => { if (window.confirm('Remover este funcionário?')) { setDeleteError(''); void remove.mutateAsync(String(row.id)) } }} onEdit={open} rows={employees.data ?? []} title="Funcionários" />
+      <EntityList
+        canCreate={canManageEmployees}
+        canDelete={canManageEmployees}
+        canEdit={canManageEmployees}
+        columns={columns}
+        createLabel="Novo funcionário"
+        deleteError={deleteError}
+        deletingId={remove.isPending ? remove.variables : undefined}
+        description="Cadastre e gerencie os funcionários."
+        isError={employees.isError}
+        isLoading={employees.isLoading}
+        onCreate={() => open()}
+        onDelete={row => {
+          if (canManageEmployees && window.confirm('Remover este funcionário?')) {
+            setDeleteError('')
+            void remove.mutateAsync(String(row.id))
+          }
+        }}
+        onEdit={open}
+        rows={employees.data ?? []}
+        title="Funcionários"
+      />
       {modalOpen && <EmployeeFormModal editing={editing} onClose={() => setModalOpen(false)} onSave={async values => { await save.mutateAsync({ id: editing?.id ? String(editing.id) : undefined, values }) }} />}
     </>
   )

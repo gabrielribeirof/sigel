@@ -10,8 +10,8 @@ import { RolesLayout } from './pages/roles/roles.layout'
 import { RolesPage } from './pages/roles/roles.page'
 import { UsersLayout } from './pages/users/users.layout'
 import { UsersPage } from './pages/users/users.page'
-import { ProtectedRoute, PublicRoute } from './app/route-guards'
-import { DASHBOARD_ROUTE_SEGMENTS, ROUTES } from './app/routes'
+import { PermissionRoute, ProtectedRoute, PublicRoute } from './app/route-guards'
+import { DASHBOARD_ROUTE_SEGMENTS, ROUTE_PERMISSIONS, ROUTES } from './app/routes'
 
 function AppRoutes() {
   return (
@@ -26,18 +26,24 @@ function AppRoutes() {
             <Route path={DASHBOARD_ROUTE_SEGMENTS.categories} element={<CatalogPage kind="categories" />} />
             <Route path={DASHBOARD_ROUTE_SEGMENTS.equipments} element={<CatalogPage kind="equipments" />} />
             <Route path={DASHBOARD_ROUTE_SEGMENTS.promotions} element={<CatalogPage kind="promotions" />} />
-            <Route
-              element={<UsersLayout><UsersPage /></UsersLayout>}
-              path={DASHBOARD_ROUTE_SEGMENTS.users}
-            />
-            <Route
-              element={<EmployeesLayout><EmployeesPage /></EmployeesLayout>}
-              path={DASHBOARD_ROUTE_SEGMENTS.employees}
-            />
-            <Route
-              element={<RolesLayout><RolesPage /></RolesLayout>}
-              path={DASHBOARD_ROUTE_SEGMENTS.roles}
-            />
+            <Route element={<PermissionRoute permission={ROUTE_PERMISSIONS.users} />}>
+              <Route
+                element={<UsersLayout><UsersPage /></UsersLayout>}
+                path={DASHBOARD_ROUTE_SEGMENTS.users}
+              />
+            </Route>
+            <Route element={<PermissionRoute permission={ROUTE_PERMISSIONS.employees} />}>
+              <Route
+                element={<EmployeesLayout><EmployeesPage /></EmployeesLayout>}
+                path={DASHBOARD_ROUTE_SEGMENTS.employees}
+              />
+            </Route>
+            <Route element={<PermissionRoute permission={ROUTE_PERMISSIONS.roles} />}>
+              <Route
+                element={<RolesLayout><RolesPage /></RolesLayout>}
+                path={DASHBOARD_ROUTE_SEGMENTS.roles}
+              />
+            </Route>
           </Route>
         </Route>
         <Route element={<Navigate replace to={ROUTES.login} />} path="*" />

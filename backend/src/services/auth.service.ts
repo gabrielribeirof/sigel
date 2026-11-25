@@ -134,7 +134,7 @@ export class AuthService {
 	private async resolvePermissionsMask(user: User): Promise<string> {
 		if (!this.roles) return '0'
 		const role = await this.roles.findById(user.roleId)
-		return role?.permissionsMask.value.toString() ?? '0'
+		return role?.mask.toString() ?? '0'
 	}
 }
 
