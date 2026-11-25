@@ -13,7 +13,8 @@ export class AppError extends Error {
 
 	private static statusCodeFor(type: string): number {
 		if (type === 'INVALID_PARAMETERS') return 400
-		if (type === 'INVALID_CREDENTIALS') return 401
+		if (type === 'INVALID_CREDENTIALS' || type === 'AUTHENTICATION_REQUIRED') return 401
+		if (type === 'FORBIDDEN') return 403
 		if (type === 'NOT_FOUND') return 404
 		if (type === 'CONFLICT') return 409
 		return 500
@@ -29,6 +30,12 @@ export class InvalidParametersError extends AppError {
 export class InvalidCredentialsError extends AppError {
 	public constructor() {
 		super('INVALID_CREDENTIALS', 'Credenciais inválidas')
+	}
+}
+
+export class ForbiddenError extends AppError {
+	public constructor(message: string = 'Você não tem permissão para realizar esta ação.') {
+		super('FORBIDDEN', message)
 	}
 }
 

@@ -13,6 +13,7 @@ import { Argon2PasswordHasher } from './infrastructure/providers/password-hasher
 import { UserService } from './services/user.service.js'
 import { EmployeeService } from './services/employee.service.js'
 import { RoleService } from './services/role.service.js'
+import { AuthorizationService } from './services/authorization.service.js'
 import { UserController } from './controllers/users/users.controller.js'
 import { EmployeeController } from './controllers/employees/employees.controller.js'
 import { RoleController } from './controllers/roles/roles.controller.js'
@@ -53,6 +54,7 @@ export class Application {
 		const userService = new UserService(users, roles, new Argon2PasswordHasher(), tokens)
 		const employeeService = new EmployeeService(employees)
 		const roleService = new RoleService(roles)
+		const authorizationService = new AuthorizationService(users, roles)
 		const authService = new AuthService(
 			userService,
 			tokens,
@@ -63,9 +65,9 @@ export class Application {
 
 		new HealthController(this.httpServer)
 		new AuthController(authService, this.httpServer)
-		new UserController(userService, this.httpServer)
-		new EmployeeController(employeeService, this.httpServer)
-		new RoleController(roleService, this.httpServer)
+		new UserController(userService, authorizationService, this.httpServer)
+		new EmployeeController(employeeService, authorizationService, this.httpServer)
+		new RoleController(roleService, authorizationService, this.httpServer)
 
 		const { CatalogController } = await import('./controllers/catalog/catalog.controller.js')
 

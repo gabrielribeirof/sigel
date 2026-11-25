@@ -98,6 +98,14 @@ export class Role {
 		return this._permissionsMask.has(permission)
 	}
 
+	public hasAll(...permissions: PermissionBit[]): boolean {
+		return this._permissionsMask.hasAll(...permissions)
+	}
+
+	public hasAny(...permissions: PermissionBit[]): boolean {
+		return this._permissionsMask.hasAny(...permissions)
+	}
+
 	private ensureMutable(): void {
 		if (this._id.value === ADMINISTRATOR_ROLE_ID) {
 			throw new AppError('ADMINISTRATOR_ROLE_PROTECTED', 'A role administradora não pode ser alterada.')

@@ -5,6 +5,8 @@ import { InMemoryRoleRepository } from '../../infrastructure/repositories/in-mem
 import { InMemoryUserRepository } from '../../infrastructure/repositories/in-memory/in-memory-user.repository.js'
 import { FakePasswordHasher } from '../../infrastructure/providers/password-hasher/fake.password-hasher.js'
 import type { HttpServer, RouteHandler } from '../../infrastructure/http/http.types.js'
+import type { Authorizer } from '../../domain/auth/authorizer.js'
+import { ForbiddenError } from '../../shared/errors/app.error.js'
 
 class InMemoryHttpServer implements HttpServer {
 	public readonly routes = new Map<string, RouteHandler>()
@@ -16,12 +18,23 @@ class InMemoryHttpServer implements HttpServer {
 	public listen(): void {}
 }
 
+class AllowingAuthorizer implements Authorizer {
+	public async authorize(): Promise<void> {}
+}
+
+class DenyingAuthorizer implements Authorizer {
+	public async authorize(): Promise<void> {
+		throw new ForbiddenError()
+	}
+}
+
 describe('UserController', () => {
 	it('should register user routes without a legacy login route', () => {
 		const httpServer = new InMemoryHttpServer()
 		const roles = new InMemoryRoleRepository()
 		new UserController(
 			new UserService(new InMemoryUserRepository(), roles, new FakePasswordHasher()),
+			new AllowingAuthorizer(),
 			httpServer,
 		)
 
@@ -38,7 +51,7 @@ describe('UserController', () => {
 			roles,
 			new FakePasswordHasher(),
 		)
-		const sut = new UserController(service, httpServer)
+		const sut = new UserController(service, new AllowingAuthorizer(), httpServer)
 
 		const created = await sut.create({
 			params: {},
@@ -57,5 +70,21 @@ describe('UserController', () => {
 
 		expect(created.statusCode).toBe(201)
 		expect(update.statusCode).toBe(200)
+	})
+
+	it('should reject unauthorized user actions with ForbiddenError', async () => {
+		const httpServer = new InMemoryHttpServer()
+		const roles = new InMemoryRoleRepository()
+		const sut = new UserController(
+			new UserService(new InMemoryUserRepository(), roles, new FakePasswordHasher()),
+			new DenyingAuthorizer(),
+			httpServer,
+		)
+
+		await expect(sut.list({
+			params: {},
+			query: {},
+			body: {},
+		})).rejects.toThrow(ForbiddenError)
 	})
 })

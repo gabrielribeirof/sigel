@@ -8,16 +8,31 @@ import {
 	employeeUpdateSchema,
 } from './schemas/employee.schemas.js'
 import { parseDateOnly } from '../../shared/dates/date-only.js'
+import { Permission } from '../../domain/role/permission.js'
+import { PermissionRequirement } from '../../domain/role/permission-requirement.js'
+import type { Authorizer } from '../../domain/auth/authorizer.js'
 
 export class EmployeeController {
-	public constructor(private readonly service: EmployeeService, httpServer: HttpServer) {
-		httpServer.register('GET', '/employees', () => this.list())
+	public constructor(
+		private readonly service: EmployeeService,
+		private readonly authorizer: Authorizer,
+		httpServer: HttpServer,
+	) {
+		httpServer.register('GET', '/employees', request => this.list(request))
 		httpServer.register('POST', '/employees', request => this.create(request))
 		httpServer.register('PUT', '/employees/:id', request => this.update(request))
 		httpServer.register('DELETE', '/employees/:id', request => this.remove(request))
 	}
 
-	public async list(): Promise<Response> {
+	public async list(request: Request): Promise<Response> {
+		await this.authorizer.authorize(
+			request.userId,
+			PermissionRequirement.any(
+				Permission.ReadEmployees,
+				Permission.ManageEmployees,
+				Permission.ManageUsers,
+			),
+		)
 		return {
 			statusCode: StatusCode.Ok,
 			body: (await this.service.findAll()).map(EmployeeMapper.toDTO),
@@ -25,6 +40,7 @@ export class EmployeeController {
 	}
 
 	public async create(request: Request): Promise<Response> {
+		await this.authorizer.authorize(request.userId, Permission.ManageEmployees)
 		const body = await validate(employeeCreateSchema, request.body)
 		const employee = await this.service.create({
 			registration: body.registration,
@@ -41,6 +57,7 @@ export class EmployeeController {
 	}
 
 	public async update(request: Request): Promise<Response> {
+		await this.authorizer.authorize(request.userId, Permission.ManageEmployees)
 		await validate(employeeIdSchema, request.params)
 		const body = await validate(employeeUpdateSchema, request.body)
 		const input: EmployeeUpdateInput = {
@@ -60,6 +77,7 @@ export class EmployeeController {
 	}
 
 	public async remove(request: Request): Promise<Response> {
+		await this.authorizer.authorize(request.userId, Permission.ManageEmployees)
 		await validate(employeeIdSchema, request.params)
 		await this.service.delete(request.params.id)
 		return {

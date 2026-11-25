@@ -24,4 +24,12 @@ export class PermissionsMask extends ValueObject<bigint> {
 		const value = typeof bit === 'bigint' ? bit : bit.value
 		return (this.value & value) === value
 	}
+
+	public hasAll(...bits: Array<bigint | { value: bigint }>): boolean {
+		return bits.every(bit => this.has(bit))
+	}
+
+	public hasAny(...bits: Array<bigint | { value: bigint }>): boolean {
+		return bits.some(bit => this.has(bit))
+	}
 }

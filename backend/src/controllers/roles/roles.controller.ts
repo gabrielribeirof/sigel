@@ -3,25 +3,36 @@ import { StatusCode, type HttpServer, type Request, type Response } from '../../
 import { validate } from '../../shared/validation/validate.js'
 import { RoleMapper } from '../../shared/mappers/role.mapper.js'
 import { roleCreateSchema, roleIdSchema, roleUpdateSchema } from './schemas/role.schemas.js'
-import { permissionEntries } from '../../domain/role/permission.js'
+import { Permission, permissionEntries } from '../../domain/role/permission.js'
+import { PermissionRequirement } from '../../domain/role/permission-requirement.js'
+import type { Authorizer } from '../../domain/auth/authorizer.js'
 
 export class RoleController {
-	public constructor(private readonly service: RoleService, httpServer: HttpServer) {
-		httpServer.register('GET', '/roles', () => this.list())
-		httpServer.register('GET', '/permissions', () => this.permissions())
+	public constructor(
+		private readonly service: RoleService,
+		private readonly authorizer: Authorizer,
+		httpServer: HttpServer,
+	) {
+		httpServer.register('GET', '/roles', request => this.list(request))
+		httpServer.register('GET', '/permissions', request => this.permissions(request))
 		httpServer.register('POST', '/roles', request => this.create(request))
 		httpServer.register('PUT', '/roles/:id', request => this.update(request))
 		httpServer.register('DELETE', '/roles/:id', request => this.remove(request))
 	}
 
-	public async list(): Promise<Response> {
+	public async list(request: Request): Promise<Response> {
+		await this.authorizer.authorize(
+			request.userId,
+			PermissionRequirement.any(Permission.ManageRoles, Permission.ManageUsers),
+		)
 		return {
 			statusCode: StatusCode.Ok,
 			body: (await this.service.findAll()).map(RoleMapper.toDTO),
 		}
 	}
 
-	public permissions(): Response {
+	public async permissions(request: Request): Promise<Response> {
+		await this.authorizer.authorize(request.userId, Permission.ManageRoles)
 		return {
 			statusCode: StatusCode.Ok,
 			body: permissionEntries().map(({ key, keyName, bit }) => ({
@@ -33,6 +44,7 @@ export class RoleController {
 	}
 
 	public async create(request: Request): Promise<Response> {
+		await this.authorizer.authorize(request.userId, Permission.ManageRoles)
 		const body = await validate(roleCreateSchema, request.body)
 		const role = await this.service.create(body.name, BigInt(body.permissionsMask ?? '0'))
 		return {
@@ -42,6 +54,7 @@ export class RoleController {
 	}
 
 	public async update(request: Request): Promise<Response> {
+		await this.authorizer.authorize(request.userId, Permission.ManageRoles)
 		await validate(roleIdSchema, request.params)
 		const body = await validate(roleUpdateSchema, request.body)
 		const role = await this.service.update(request.params.id, body.name, BigInt(body.permissionsMask))
@@ -52,6 +65,7 @@ export class RoleController {
 	}
 
 	public async remove(request: Request): Promise<Response> {
+		await this.authorizer.authorize(request.userId, Permission.ManageRoles)
 		await validate(roleIdSchema, request.params)
 		await this.service.delete(request.params.id)
 		return {
