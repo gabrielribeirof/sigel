@@ -10,6 +10,9 @@ import { CategoryTypeormEntity } from '../../config/typeorm/entities/category.ty
 import { EquipmentTypeormEntity } from '../../config/typeorm/entities/equipment.typeorm-entity.js'
 import { PromotionTypeormEntity } from '../../config/typeorm/entities/promotion.typeorm-entity.js'
 import { TypeORMDataSource } from '../../config/typeorm/data-source.js'
+import type { Authorizer } from '../../domain/auth/authorizer.js'
+import { Permission } from '../../domain/role/permission.js'
+import type { PermissionBit } from '../../domain/role/permission-bit.js'
 
 type RecordData = Record<string, unknown>
 type CatalogEntity = CategoryTypeormEntity | EquipmentTypeormEntity | PromotionTypeormEntity
@@ -23,6 +26,12 @@ const fields = {
 	equipments: ['code', 'name', 'categoryId', 'dailyRate', 'status', 'storageInstructions'],
 	promotions: ['name', 'startDate', 'endDate', 'discountPercent', 'rentalTarget'],
 } as const
+
+const catalogPermission: Record<keyof typeof fields, PermissionBit> = {
+	categories: Permission.ManageCategories,
+	equipments: Permission.ManageEquipments,
+	promotions: Permission.ManagePromotions,
+}
 
 function payload(value: unknown, keys: readonly string[]): RecordData {
 	if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -43,9 +52,10 @@ export class CatalogController {
 		private categories: Repository<CategoryTypeormEntity>,
 		private equipments: Repository<EquipmentTypeormEntity>,
 		private promotions: Repository<PromotionTypeormEntity>,
+		private authorizer: Authorizer,
 	) {
 		for (const name of ['categories', 'equipments', 'promotions'] as const) {
-			http.register('GET', `/${name}`, () => this.list(name))
+			http.register('GET', `/${name}`, () => this.list(name), { public: true })
 			http.register('POST', `/${name}`, req => this.save(name, req))
 			http.register('PUT', `/${name}/:id`, req => this.save(name, req))
 			http.register('DELETE', `/${name}/:id`, req => this.remove(name, req))
@@ -85,6 +95,7 @@ export class CatalogController {
 	}
 
 	async save(name: keyof typeof fields, req: Request): Promise<Response> {
+		await this.authorizer.authorize(req.userId, catalogPermission[name])
 		try {
 			const data = payload(req.body, fields[name])
 			const id = req.params.id ?? randomUUID()
@@ -205,6 +216,7 @@ export class CatalogController {
 	}
 
 	async remove(name: keyof typeof fields, req: Request): Promise<Response> {
+		await this.authorizer.authorize(req.userId, catalogPermission[name])
 		try {
 			const result = await this.repository(name).delete(req.params.id)
 			return {

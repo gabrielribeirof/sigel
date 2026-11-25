@@ -77,6 +77,7 @@ export class Application {
 			TypeORMDataSource.getRepository(CategoryTypeormEntity),
 			TypeORMDataSource.getRepository(EquipmentTypeormEntity),
 			TypeORMDataSource.getRepository(PromotionTypeormEntity),
+			authorizationService,
 		)
 
 		this.httpServer.listen(EnvConfig.get('HTTP_PORT'))

@@ -62,6 +62,21 @@ describe('RoleController', () => {
 				keyName: 'Gerenciar perfis',
 				bit: '4',
 			},
+			{
+				key: 'ManageCategories',
+				keyName: 'Gerenciar categorias',
+				bit: '8',
+			},
+			{
+				key: 'ManageEquipments',
+				keyName: 'Gerenciar equipamentos',
+				bit: '16',
+			},
+			{
+				key: 'ManagePromotions',
+				keyName: 'Gerenciar pacotes promocionais',
+				bit: '32',
+			},
 		])
 	})
 
