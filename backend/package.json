@@ -8,14 +8,14 @@
     "node": "^24.22.2"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "node -e \"import('node:fs').then(fs => fs.rmSync('dist', { recursive: true, force: true }))\" && tsc -p tsconfig.build.json",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
     "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch",
     "test:ci": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --runInBand",
     "dev": "yarn build && sh -c 'yarn tsc -p tsconfig.build.json --watch --preserveWatchOutput & exec node --watch-path=./dist --env-file=.env dist/main.js'",
     "dev:debug": "yarn build && sh -c 'yarn tsc -p tsconfig.build.json --watch --preserveWatchOutput & exec node --watch-path=./dist --inspect=0.0.0.0:9229 --enable-source-maps --env-file=.env dist/main.js'",
     "migration:create": "yarn typeorm migration:create src/config/typeorm/migrations/$npm_config_name",
-    "migration:run": "yarn build && yarn typeorm migration:run -d dist/config/typeorm/data-source.cli.js",
+    "migration:run": "yarn build && node --env-file-if-exists=.env ./node_modules/typeorm/cli.js migration:run -d dist/config/typeorm/data-source.cli.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },

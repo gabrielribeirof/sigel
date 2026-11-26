@@ -7,6 +7,8 @@ export const Permission = {
   ManageCategories: 1n << 3n,
   ManageEquipments: 1n << 4n,
   ManagePromotions: 1n << 5n,
+  ManageCustomers: 1n << 6n,
+  ManageSuppliers: 1n << 7n,
 } as const
 
 export interface PermissionRequirement {

@@ -11,6 +11,8 @@ const ROUTE_SEGMENTS = {
   categories: 'categories',
   equipments: 'equipments',
   promotions: 'promotions',
+  customers: 'customers',
+  suppliers: 'suppliers',
 } as const
 
 export const ROUTES = {
@@ -22,6 +24,8 @@ export const ROUTES = {
   categories: `/dashboard/${ROUTE_SEGMENTS.categories}`,
   equipments: `/dashboard/${ROUTE_SEGMENTS.equipments}`,
   promotions: `/dashboard/${ROUTE_SEGMENTS.promotions}`,
+  customers: `/dashboard/${ROUTE_SEGMENTS.customers}`,
+  suppliers: `/dashboard/${ROUTE_SEGMENTS.suppliers}`,
 } as const
 
 export const DASHBOARD_ROUTE_SEGMENTS = ROUTE_SEGMENTS
@@ -44,6 +48,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { path: ROUTES.employees, label: 'Funcionários', end: false, permission: ROUTE_PERMISSIONS.employees },
   { path: ROUTES.users, label: 'Usuários', end: false, permission: ROUTE_PERMISSIONS.users },
   { path: ROUTES.roles, label: 'Perfis', end: false, permission: ROUTE_PERMISSIONS.roles },
+  { path: ROUTES.customers, label: 'Clientes', end: false },
+  { path: ROUTES.suppliers, label: 'Fornecedores', end: false },
   { path: ROUTES.categories, label: 'Categorias', end: false },
   { path: ROUTES.equipments, label: 'Equipamentos', end: false },
   { path: ROUTES.promotions, label: 'Pacotes promocionais', end: false },

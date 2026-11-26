@@ -26,6 +26,10 @@ import { AuthTokenTypeormEntity } from './config/typeorm/entities/auth-token.typ
 import { AuthTokenRepository } from './infrastructure/repositories/typeorm/auth-token.repository.js'
 import { AuthService } from './services/auth.service.js'
 import { AuthController } from './controllers/auth/auth.controller.js'
+import { CustomerTypeormEntity } from './config/typeorm/entities/customer.typeorm-entity.js'
+import { SupplierTypeormEntity } from './config/typeorm/entities/supplier.typeorm-entity.js'
+import { PartyService } from './services/party.service.js'
+import { PartyController } from './controllers/parties/party.controller.js'
 import { JoseTokenProvider } from './infrastructure/providers/token/jose-token.provider.js'
 import { CryptoRefreshTokenProvider } from './infrastructure/providers/token/crypto-refresh-token.provider.js'
 
@@ -69,6 +73,12 @@ export class Application {
 		new UserController(userService, authorizationService, this.httpServer)
 		new EmployeeController(employeeService, authorizationService, this.httpServer)
 		new RoleController(roleService, authorizationService, this.httpServer)
+		new PartyController(
+			new PartyService(TypeORMDataSource.getRepository(CustomerTypeormEntity), 'customer'),
+			new PartyService(TypeORMDataSource.getRepository(SupplierTypeormEntity), 'supplier'),
+			authorizationService,
+			this.httpServer,
+		)
 
 		const { CatalogController } = await import('./controllers/catalog/catalog.controller.js')
 

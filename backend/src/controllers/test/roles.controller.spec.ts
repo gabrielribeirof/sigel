@@ -77,6 +77,16 @@ describe('RoleController', () => {
 				keyName: 'Gerenciar pacotes promocionais',
 				bit: '32',
 			},
+			{
+				key: 'ManageCustomers',
+				keyName: 'Gerenciar clientes',
+				bit: '64',
+			},
+			{
+				key: 'ManageSuppliers',
+				keyName: 'Gerenciar fornecedores',
+				bit: '128',
+			},
 		])
 	})
 

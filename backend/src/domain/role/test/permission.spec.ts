@@ -9,7 +9,7 @@ describe('Permission', () => {
 	it('should expose all permissions and their combined mask', () => {
 		const entries = permissionEntries()
 
-		expect(entries).toHaveLength(6)
+		expect(entries).toHaveLength(8)
 		expect(entries.map(entry => entry.key)).toEqual([
 			'ManageUsers',
 			'ManageEmployees',
@@ -17,6 +17,8 @@ describe('Permission', () => {
 			'ManageCategories',
 			'ManageEquipments',
 			'ManagePromotions',
+			'ManageCustomers',
+			'ManageSuppliers',
 		])
 		expect(entries.map(entry => entry.keyName)).toEqual([
 			'Gerenciar usuários',
@@ -25,8 +27,10 @@ describe('Permission', () => {
 			'Gerenciar categorias',
 			'Gerenciar equipamentos',
 			'Gerenciar pacotes promocionais',
+			'Gerenciar clientes',
+			'Gerenciar fornecedores',
 		])
-		expect(allPermissionsMask()).toBe(63n)
+		expect(allPermissionsMask()).toBe(255n)
 		expect(hasPermission(allPermissionsMask(), Permission.ManageRoles)).toBe(true)
 		expect(hasPermission(Permission.ManageUsers.value, Permission.ManageRoles)).toBe(false)
 	})

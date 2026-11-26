@@ -10,6 +10,7 @@ import { RolesLayout } from './pages/roles/roles.layout'
 import { RolesPage } from './pages/roles/roles.page'
 import { UsersLayout } from './pages/users/users.layout'
 import { UsersPage } from './pages/users/users.page'
+import { PartiesPage } from './pages/parties/parties.page'
 import { PermissionRoute, ProtectedRoute, PublicRoute } from './app/route-guards'
 import { DASHBOARD_ROUTE_SEGMENTS, ROUTE_PERMISSIONS, ROUTES } from './app/routes'
 
@@ -26,6 +27,14 @@ function AppRoutes() {
             <Route path={DASHBOARD_ROUTE_SEGMENTS.categories} element={<CatalogPage kind="categories" />} />
             <Route path={DASHBOARD_ROUTE_SEGMENTS.equipments} element={<CatalogPage kind="equipments" />} />
             <Route path={DASHBOARD_ROUTE_SEGMENTS.promotions} element={<CatalogPage kind="promotions" />} />
+            <Route
+              element={<PartiesPage key="customers" kind="customers" />}
+              path={DASHBOARD_ROUTE_SEGMENTS.customers}
+            />
+            <Route
+              element={<PartiesPage key="suppliers" kind="suppliers" />}
+              path={DASHBOARD_ROUTE_SEGMENTS.suppliers}
+            />
             <Route element={<PermissionRoute permission={ROUTE_PERMISSIONS.users} />}>
               <Route
                 element={<UsersLayout><UsersPage /></UsersLayout>}
